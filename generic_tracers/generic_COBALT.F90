@@ -906,20 +906,20 @@ contains
     ! Phytoplankton mortality terms differ by whether they are density-dependent (i.e., linear versus quadratic),
     ! temperature-dependent, and whether they vary depending on the condition (or stress) of the phytoplankton. The
     ! level of stress is defined based on the achieved growth rate relative to the maximum growth rate.  By default,
-    ! stress-dependent mortality begins to increase from 0 when this ratio falls below 0.25 (frac_mu_stress = 0.25).
+    ! stress-dependent mortality begins to increase from 0 when this ratio falls below 0.4 (frac_mu_stress = 0.4).
     !
     call get_param(param_file, "generic_COBALT", "frac_mu_stress_Sm", phyto(SMALL)%frac_mu_stress, &
                    "fraction of max growth when stress-dependent losses initiate for small phytoplankton", &
-         units="none", default=0.25)
+         units="none", default=0.4)
     call get_param(param_file, "generic_COBALT", "frac_mu_stress_Di", phyto(DIAZO)%frac_mu_stress, &
                   "fraction of max growth when stress-dependent losses initiate for diazotrophs", &
-                  units="none", default=0.25)
+                  units="none", default=0.4)
     call get_param(param_file, "generic_COBALT", "frac_mu_stress_Lg", phyto(LARGE)%frac_mu_stress, &
                    "fraction of max growth when stress-dependent losses initiate for large phytoplankton", &
-                   units="none", default=0.25)
+                   units="none", default=0.4)
     call get_param(param_file, "generic_COBALT", "frac_mu_stress_Md", phyto(MEDIUM)%frac_mu_stress, &
                    "fraction of max growth when stress-dependent losses initiate for medium phytoplankton", &
-                   units="none", default=0.25)
+                   units="none", default=0.4)
     !
     ! Phytoplankton aggregation is a density-dependent (quadratic) mortality term that is more effective for large
     ! phytoplankton, following Jackson (1990).  Aggregation rates increase with stress (e.g., Waite et al, 1992).
@@ -3423,7 +3423,7 @@ contains
               phyto(n)%theta(i,j,k) = theta_temp
               phyto(n)%bresp(i,j,k) =  bresp_temp*P_C_max_temp
               phyto(n)%mu(i,j,k) = P_C_m_temp/(1.0 + cobalt%zeta)*phyto(n)%irrlim(i,j,k) - phyto(n)%bresp(i,j,k)
-              phyto(n)%P_C_max(i,j,k) = P_C_max_temp*cobalt%expkT(i,j,k)
+              phyto(n)%P_C_max(i,j,k) = P_C_max_temp
               phyto(n)%alpha(i,j,k) = alpha_temp
             endif
           enddo
@@ -3514,14 +3514,17 @@ contains
     !
     do k = 1, nk ; do j = jsc, jec ; do i = isc, iec   !{
        do n = 1, NUM_PHYTO  !{
-          if (phyto(n)%q_fe_2_n(i,j,k).lt.phyto(n)%fe_2_n_max) then
+          ! Take up iron if below maximum guota and day averaged growth is positive
+          if ( (phyto(n)%q_fe_2_n(i,j,k).lt.phyto(n)%fe_2_n_max).and.(phyto(n)%f_mu_mem(i,j,k).gt.0.0) ) then
              ! Scaling fe uptake with the maximum photosynthesis allows for luxury iron uptake when other nutrients
-             ! are limiting but iron is not
+             ! are limiting but iron is not. Added light dependence to prevent excessive iron scavenging while sinking
              phyto(n)%juptake_fe(i,j,k) = phyto(n)%P_C_max(i,j,k)*cobalt%expkT(i,j,k)*phyto(n)%f_n(i,j,k)* &
+                (1.0 - exp(-phyto(n)%alpha(i,j,k)*cobalt%f_irr_aclm(i,j,k)*phyto(n)%theta(i,j,k)/ &
+                max(phyto(n)%liebig_lim(i,j,k)*phyto(n)%P_C_max(i,j,k)*cobalt%expkT(i,j,k),epsln)))* &
                 phyto(n)%felim(i,j,k)*cobalt%fe_2_n_upt_fac
              phyto(n)%jexuloss_fe(i,j,k) = 0.0
           else
-             ! if you've exceeded the maximum quota, stop uptake and exude extra
+             ! if you've exceeded the maximum quota or day averaged growth is negative, stop uptake and exude extra
              phyto(n)%juptake_fe(i,j,k) = 0.0
              phyto(n)%jexuloss_fe(i,j,k) = cobalt%expkT(i,j,k)*phyto(n)%bresp(i,j,k)*phyto(n)%f_fe(i,j,k)
           endif
