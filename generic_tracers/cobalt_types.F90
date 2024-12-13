@@ -28,11 +28,6 @@ module cobalt_types
   !
   logical, public :: do_vertfill_pre = .false.             !< Returns tracer arrays with sensible values
   logical, public :: debug           = .false.             !< not use   
-  real, public    :: o2_min_nit= 0.01e-6                   !< Oxygen threshold for nitrification (mol O2 kg-1)
-  real, public    :: k_o2_nit  = 3.9e-6                    !< Oxygen half saturation constant for nitrification
-  real, public    :: irr_inhibit = 10.                     !< Irradiance inhibition term for nitrification (W m-2)
-  real, public    :: gamma_nitrif= 3.5e6                   !< Rate constant for nitrification (month-1)
-  real, public    :: k_nh3_nitrif= 3.1e-9                  !< NH3 half-saturation for nitrification (mol NH3 kg-1)  
   real, public    :: imbalance_tolerance=1.0e-10           !< the tolerance for non-conservation in C,N,P,Sc,Fe
 
   integer, public :: scheme_no3_nh4_lim = 2 !< Nitrate and ammonia limitation scheme options
@@ -63,8 +58,8 @@ module cobalt_types
   real, parameter, public :: vb_nh3 = 25.             !< Liquid molar volume at boiling point for NH3 (cm3 mol−1)
   real, parameter, public :: micromol2mol = 1.0e6     !< convert micromoles to moles (used in concentration parameters)
   real, parameter, public :: c2n = 106.0/16.0         !< convert nutrient ratios relative to carbon to ratios relative to nitrogen
-  real, parameter, public :: micromolQpersec2W = 2.77e18/6.022e17 !< convert photosynthetically available radiation (micromole quanta
-                                                      !! per-second) to watts. 
+  real, parameter, public :: micromolQ2Joule = 2.77e18/6.022e17 !< convert photosynthetically available radiation (micromole quanta
+                                                      !! Joules 
 
   !> An auxiliary type for storing varible names
   type vardesc
@@ -82,7 +77,6 @@ module cobalt_types
      real ::  alpha_hl          !< Chlorophyll a-specific initial slope of the photosynthesis-irradiance curve high level (g C g Chl-1 sec-1 (W m-2)-1)
      real ::  alpha_ll          !< Chlorophyll a-specific initial slope of the photosynthesis-irradiance curve low level (g C g Chl-1 sec-1 (W m-2)-1)
      real ::  fe_2_n_max        !< Maximum iron to nitrogen ratio (mol Fe mol N-1)
-     real ::  p_2_n_static      !< Fixed P:N ratio in phytoplankton (mol P mol N-1)
      real ::  p_2_n_min         !< Minimum P:N ratio (mol P mol N-1)
      real ::  p_2_n_slope       !< P:N slope (mol P mol N-1 mol P-1 kg)
      real ::  p_2_n_max         !< Maximum P:N ratio (mol P mol N-1)
@@ -95,7 +89,6 @@ module cobalt_types
      real ::  P_C_max_hl        !< Light-saturated carbon-specific photosynthesis rate high level (s-1)
      real ::  P_C_max_ll        !< Light-saturated carbon-specific photosynthesis rate low level  (s-1)
      real ::  si_2_n_max        !< Maximum silica to nitrogen ratio (mol Si mol N-1)
-     real ::  si_2_n_static     !< Fixed SI:N ratio in phytoplankton (mol Si mol N-1)
      real ::  thetamax          !< Maximum chlorophyll to carbon ratio (g Chl g C-1)
      real ::  bresp_frac_mixed  !< basal respiration rate in mixed layer (dimensionless)
      real ::  bresp_frac_strat  !< basal respiration rate outside mixed layer (dimensionless)
@@ -418,7 +411,6 @@ module cobalt_types
           force_update_fluxes,&                ! If OCMIP2 tracers fluxes should be updated every coupling timesteps
                                                !    when update_from_source is not called every coupling timesteps
                                                !    as is the case with MOM6  THERMO_SPANS_COUPLING option
-          p_2_n_static,     &                  ! If P:N is fixed in phytoplankton
           cased_steady,     &                  ! steady state approximation for cased
           tracer_debug
 
@@ -445,7 +437,6 @@ module cobalt_types
           ml_aclm_efold,    &
           zmld_ref,         &
           densdiff_mld,     &
-          irrad_day_thresh, &
           case2_depth,      & ! depth threshold for case 2 (coastal) waters
           case2_salt,       & ! salt threshold for case 2 (coastal) waters
           case2_opac_add,   & ! added opacity for case 2 (coastal) waters
@@ -495,7 +486,7 @@ module cobalt_types
           gamma_cased,      &
           Co_cased,         &
           o2_min,           &
-          o2_min_amx,       &
+          o2_max_amx,       &
           o2_min_nit,       &
           o2_2_nfix,        &
           o2_2_nh4,         &
