@@ -413,6 +413,8 @@ module cobalt_types
                                                !    as is the case with MOM6  THERMO_SPANS_COUPLING option
           cased_steady,     &                  ! steady state approximation for cased
           tracer_debug
+     real  ::          &
+          min_thickness       ! minimum thickness of a layer that will be checked for source/sink imbalances
 
      real  ::          &
           atm_co2_flux,     &

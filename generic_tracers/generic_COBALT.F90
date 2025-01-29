@@ -1632,6 +1632,9 @@ contains
     ! Unused?
     call get_param(param_file, "generic_COBALT", "tracer_debug",  cobalt%tracer_debug, &
                   "flag for tracer debug operations", default=.false.)
+    call get_param(param_file, "generic_COBALT", "min_thickness_for_imbalance",  cobalt%min_thickness, &
+                   "minimum thickness of a layer that will be checked for source/sink imbalances", &
+                   units="m", default= 0.001)
 
     call g_tracer_end_param_list(package_name)
   end subroutine user_add_params
@@ -2861,6 +2864,7 @@ contains
 
     real :: tr,ltr
     real :: imbal
+    real :: min_thick
     integer :: stdoutunit, imbal_flag, outunit
     type(g_tracer_type), pointer :: g_tracer,g_tracer_next
     real :: KD_SMOOTH = 1.0E-05
@@ -5540,12 +5544,14 @@ contains
     ! CAS calculate totals after source/sinks have been applied
     imbal_flag = 0;
     stdoutunit = stdout();
+    min_thick = cobalt%min_thickness
     allocate(post_totn(isc:iec,jsc:jec,1:nk))
     allocate(post_totc(isc:iec,jsc:jec,1:nk))
     allocate(post_totp(isc:iec,jsc:jec,1:nk))
     allocate(post_totsi(isc:iec,jsc:jec,1:nk))
     allocate(post_totfe(isc:iec,jsc:jec,1:nk))
     do k = 1, nk ; do j = jsc, jec ; do i = isc, iec  !{
+      if (dzt(i,j,k).gt. min_thick) then
          post_totn(i,j,k) = (cobalt%p_no3(i,j,k,tau) + cobalt%p_nh4(i,j,k,tau) + &
                     cobalt%p_ndi(i,j,k,tau) + cobalt%p_nlg(i,j,k,tau) + cobalt%p_nmd(i,j,k,tau) + &
                     cobalt%p_nsm(i,j,k,tau) + cobalt%p_nbact(i,j,k,tau) + &
@@ -5603,6 +5609,7 @@ contains
            call mpp_error(FATAL,&
            '==>biological source/sink imbalance (generic_COBALT_update_from_source): Silica')
          endif
+      endif
     enddo; enddo ; enddo  !} i,j,k
 
 
