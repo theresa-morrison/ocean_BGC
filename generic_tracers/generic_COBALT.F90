@@ -2557,8 +2557,8 @@ contains
     call g_tracer_get_values(tracer_list,'fedet','btm_reservoir',cobalt%ffedet_btm,isd,jsd)
     cobalt%ffedet_btm = cobalt%ffedet_btm/dt
     ! uncomment for "no mass change check"
-    !call g_tracer_get_pointer(tracer_list,'fedet_btf','field',temp_field)
-    !temp_field(:,:,1) = cobalt%ffedet_btm(:,:)
+    call g_tracer_get_pointer(tracer_list,'fedet_btf','field',temp_field)
+    temp_field(:,:,1) = cobalt%ffedet_btm(:,:)
     call g_tracer_set_values(tracer_list,'fedet','btm_reservoir',0.0)
     used = g_send_data(cobalt%id_ffedet_btm, cobalt%ffedet_btm, &
     model_time, rmask = grid_tmask(:,:,1), &
@@ -2650,6 +2650,8 @@ contains
     !! handled separately later using a relationship based on Dale et al., 2015. 
     call g_tracer_get_values(tracer_list,'fedi','btm_reservoir',phyto(DIAZO)%ffe_btm,isd,jsd)
     phyto(DIAZO)%ffe_btm = phyto(DIAZO)%ffe_btm/dt
+    call g_tracer_get_pointer(tracer_list,'fedi_btf','field',temp_field)
+    temp_field(:,:,1) = phyto(DIAZO)%ffe_btm(:,:)
     call g_tracer_set_values(tracer_list,'fedi','btm_reservoir',0.0)
     used = g_send_data(phyto(DIAZO)%id_ffe_btm,phyto(DIAZO)%ffe_btm, &
     model_time, rmask = grid_tmask(:,:,1),&
@@ -2657,6 +2659,8 @@ contains
 
     call g_tracer_get_values(tracer_list,'felg','btm_reservoir',phyto(LARGE)%ffe_btm,isd,jsd)
     phyto(LARGE)%ffe_btm = phyto(LARGE)%ffe_btm/dt
+    call g_tracer_get_pointer(tracer_list,'felg_btf','field',temp_field)
+    temp_field(:,:,1) = phyto(LARGE)%ffe_btm(:,:)
     call g_tracer_set_values(tracer_list,'felg','btm_reservoir',0.0)
     used = g_send_data(phyto(LARGE)%id_ffe_btm,phyto(LARGE)%ffe_btm, &
     model_time, rmask = grid_tmask(:,:,1),&
@@ -2664,6 +2668,8 @@ contains
 
     call g_tracer_get_values(tracer_list,'femd','btm_reservoir',phyto(MEDIUM)%ffe_btm,isd,jsd)
     phyto(MEDIUM)%ffe_btm = phyto(MEDIUM)%ffe_btm/dt
+    call g_tracer_get_pointer(tracer_list,'femd_btf','field',temp_field)
+    temp_field(:,:,1) = phyto(MEDIUM)%ffe_btm(:,:)
     call g_tracer_set_values(tracer_list,'femd','btm_reservoir',0.0)
     used = g_send_data(phyto(MEDIUM)%id_ffe_btm,phyto(MEDIUM)%ffe_btm, &
     model_time, rmask = grid_tmask(:,:,1),&
@@ -2671,6 +2677,8 @@ contains
 
     call g_tracer_get_values(tracer_list,'fesm','btm_reservoir',phyto(SMALL)%ffe_btm,isd,jsd)
     phyto(SMALL)%ffe_btm = phyto(SMALL)%ffe_btm/dt
+    call g_tracer_get_pointer(tracer_list,'fesm_btf','field',temp_field)
+    temp_field(:,:,1) = phyto(SMALL)%ffe_btm(:,:)
     call g_tracer_set_values(tracer_list,'fesm','btm_reservoir',0.0)
     used = g_send_data(phyto(SMALL)%id_ffe_btm,phyto(SMALL)%ffe_btm, &
     model_time, rmask = grid_tmask(:,:,1),&
@@ -3116,7 +3124,7 @@ contains
     call g_tracer_get_values(tracer_list,'silg_btf','field',cobalt%f_silg_btf,isd,jsd)
     call g_tracer_get_values(tracer_list,'simd_btf','field',cobalt%f_simd_btf,isd,jsd)
     ! uncomment for "no mass change" test
-    !call g_tracer_get_values(tracer_list,'fedet_btf','field',cobalt%f_fedet_btf,isd,jsd)
+    call g_tracer_get_values(tracer_list,'fedet_btf','field',cobalt%f_fedet_btf,isd,jsd)
     call g_tracer_get_values(tracer_list,'irr_aclm','field',cobalt%f_irr_aclm ,isd,jsd)
     call g_tracer_get_values(tracer_list,'irr_aclm_z','field',cobalt%f_irr_aclm_z ,isd,jsd)
     call g_tracer_get_values(tracer_list,'irr_aclm_sfc','field',cobalt%f_irr_aclm_sfc ,isd,jsd)
