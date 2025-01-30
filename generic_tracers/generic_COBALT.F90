@@ -2864,7 +2864,6 @@ contains
 
     real :: tr,ltr
     real :: imbal
-    real :: min_thick
     integer :: stdoutunit, imbal_flag, outunit
     type(g_tracer_type), pointer :: g_tracer,g_tracer_next
     real :: KD_SMOOTH = 1.0E-05
@@ -5542,16 +5541,20 @@ contains
     call g_tracer_set_values(tracer_list,'mu_mem_nsm' ,'field',phyto(SMALL)%f_mu_mem ,isd,jsd)
 
     ! CAS calculate totals after source/sinks have been applied
+    ! Imbalance in one timestep is converted from moles kg-1 to units of mmoles m-3 day-1 and compared 
+    ! to a tolerance set in the input namelist. This means that imbalance is not sensetive to the timestep 
+    ! and has understandable units. For example, typical plankton concentrations are ~0.1-1 mmoles N m-3 
+    ! day-1, so an imbalance of order 1 would be very large whereas 1e-9 is very small. 
+    ! A reccomended tolerance is between 1e-7 and 1e-9. 
     imbal_flag = 0;
     stdoutunit = stdout();
-    min_thick = cobalt%min_thickness
     allocate(post_totn(isc:iec,jsc:jec,1:nk))
     allocate(post_totc(isc:iec,jsc:jec,1:nk))
     allocate(post_totp(isc:iec,jsc:jec,1:nk))
     allocate(post_totsi(isc:iec,jsc:jec,1:nk))
     allocate(post_totfe(isc:iec,jsc:jec,1:nk))
     do k = 1, nk ; do j = jsc, jec ; do i = isc, iec  !{
-      if (dzt(i,j,k).gt. min_thick) then
+      if (dzt(i,j,k).gt.cobalt%min_thickness) then
          post_totn(i,j,k) = (cobalt%p_no3(i,j,k,tau) + cobalt%p_nh4(i,j,k,tau) + &
                     cobalt%p_ndi(i,j,k,tau) + cobalt%p_nlg(i,j,k,tau) + cobalt%p_nmd(i,j,k,tau) + &
                     cobalt%p_nsm(i,j,k,tau) + cobalt%p_nbact(i,j,k,tau) + &
