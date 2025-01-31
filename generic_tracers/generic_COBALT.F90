@@ -1658,6 +1658,9 @@ contains
     ! Unused?
     call get_param(param_file, "generic_COBALT", "tracer_debug",  cobalt%tracer_debug, &
                   "flag for tracer debug operations", default=.false.)
+    call get_param(param_file, "generic_COBALT", "min_thickness_for_imbalance",  cobalt%min_thickness, &
+                   "minimum thickness of a layer that will be checked for source/sink imbalances", &
+                   units="m", default= 0.001)
 
     call g_tracer_end_param_list(package_name)
   end subroutine user_add_params
@@ -5595,6 +5598,11 @@ contains
     call g_tracer_set_values(tracer_list,'mu_mem_nsm' ,'field',phyto(SMALL)%f_mu_mem ,isd,jsd)
 
     ! CAS calculate totals after source/sinks have been applied
+    ! Imbalance in one timestep is converted from moles kg-1 to units of mmoles m-3 day-1 and compared 
+    ! to a tolerance set in the input namelist. This means that imbalance is not sensetive to the timestep 
+    ! and has understandable units. For example, typical plankton concentrations are ~0.1-1 mmoles N m-3 
+    ! day-1, so an imbalance of order 1 would be very large whereas 1e-9 is very small. 
+    ! A reccomended tolerance is between 1e-7 and 1e-9. 
     imbal_flag = 0;
     stdoutunit = stdout();
     allocate(post_totn(isc:iec,jsc:jec,1:nk))
@@ -5603,6 +5611,7 @@ contains
     allocate(post_totsi(isc:iec,jsc:jec,1:nk))
     allocate(post_totfe(isc:iec,jsc:jec,1:nk))
     do k = 1, nk ; do j = jsc, jec ; do i = isc, iec  !{
+      if (dzt(i,j,k).gt.cobalt%min_thickness) then
          post_totn(i,j,k) = (cobalt%p_no3(i,j,k,tau) + cobalt%p_nh4(i,j,k,tau) + &
                     cobalt%p_ndi(i,j,k,tau) + cobalt%p_nlg(i,j,k,tau) + cobalt%p_nmd(i,j,k,tau) + &
                     cobalt%p_nsm(i,j,k,tau) + cobalt%p_nbact(i,j,k,tau) + &
@@ -5660,6 +5669,7 @@ contains
            call mpp_error(FATAL,&
            '==>biological source/sink imbalance (generic_COBALT_update_from_source): Silica')
          endif
+      endif
     enddo; enddo ; enddo  !} i,j,k
 
     !
