@@ -2821,7 +2821,7 @@ contains
   ! If you'd like to pass the thermodynamic variables for a mld calculation
   subroutine generic_COBALT_update_from_source(tracer_list,Temp,Salt,rho_dzt,dzt,hblt_depth,&
        ilb,jlb,tau,dt,grid_dat,model_time,nbands,max_wavelength_band,sw_pen_band,opacity_band,internal_heat,frunoff, &
-       geolat, photo_acc_dpth)
+       geolat, photo_acc_dpth, salt_flux_added)
   !subroutine generic_COBALT_update_from_source(tracer_list,Temp,Salt,rho_dzt,dzt,hblt_depth,&
   !     ilb,jlb,tau,dt,grid_dat,model_time,nbands,max_wavelength_band,sw_pen_band,opacity_band,internal_heat,frunoff)
 
@@ -2844,6 +2844,7 @@ contains
     real, dimension(ilb:,jlb:),     intent(in) :: frunoff
     real, dimension(ilb:,jlb:),     intent(in) :: geolat
     real, dimension(ilb:,jlb:), optional, intent(in) :: photo_acc_dpth
+    real, dimension(ilb:,jlb:), optional, intent(in) :: salt_flux_added 
 
     character(len=fm_string_len), parameter :: sub_name = 'generic_COBALT_update_from_source'
     integer :: isc,iec, jsc,jec,isd,ied,jsd,jed,nk,ntau, i, j, k , m, n, k_100, k_200, kmld_ref
